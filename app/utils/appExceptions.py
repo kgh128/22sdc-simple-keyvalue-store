@@ -26,7 +26,7 @@ async def app_exception_handler(request: Request, exc: AppExceptionCase):
 
 
 class AppException(object):
-    class GetItem(AppExceptionCase):
+    class ItemNotFound(AppExceptionCase):
         def __init__(self, context: dict = None):
             """
             Item not found
