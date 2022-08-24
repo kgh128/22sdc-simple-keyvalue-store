@@ -1,9 +1,13 @@
 from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
-from app.services.item import ItemService
-from app.schemas.item import Item
+store = {1: "hello"}
 
-from app.utils.serviceResult import handle_result
+
+class Item(BaseModel):
+    key: int
+    value: str | None = Field(default=None, max_length=1024)
+
 
 router = APIRouter(
     prefix="/item",
@@ -14,5 +18,7 @@ router = APIRouter(
 
 @router.get("/{key}", response_model=Item)
 async def get_item(key: int):
-    result = ItemService.get_item(key)
-    return handle_result(result)
+    if key in store:
+        item = {"key": key, "value": store[key]}
+        item = Item(**item)
+        return item
