@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 store = {1: "hello"}
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.get("/{key}", response_model=Item)
 async def get_item(key: int):
-    if key in store:
-        item = {"key": key, "value": store[key]}
-        item = Item(**item)
-        return item
+    if key not in store:
+        raise HTTPException(status_code=404, detail="Item not found")
+    item = {"key": key, "value": store[key]}
+    return Item(**item)
