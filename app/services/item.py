@@ -21,11 +21,12 @@ class ItemService:
         return Item(**item)
 
     def put_item(item: Item):
-        store[item.key] = item.value
-
         if item.key not in store:
             item.description = "Put item"
-        item.description = "Update item"
+        else:
+            item.description = "Update item"
+
+        store[item.key] = item.value
 
         return item
 
