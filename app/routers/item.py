@@ -1,12 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from app.schemas.item import Item
+
 store = {1: "hello"}
-
-
-class Item(BaseModel):
-    key: int
-    value: str | None = Field(default=None, max_length=1024)
 
 
 router = APIRouter(
