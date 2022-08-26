@@ -38,33 +38,33 @@ class ItemCRUD:
     store: dict[int, str] = {}
 
     # noinspection PyMethodMayBeStatic
-    def create_item(self, description: str, key: int, value: str):
+    def create_item(self, description: str, key: int, value: str) -> Item:
         item = {"description": description,
                 "key": key,
                 "value": value}
         return Item(**item)
 
-    def get_item(self, key: int):
+    def get_item(self, key: int) -> Item:
         if key not in self.store:
             return None
         item = self.create_item("Get item", key, self.store[key])
         return item
 
-    def put_item(self, item: Item):
+    def put_item(self, item: Item) -> Item:
         if item.key in self.store:
             return None
         item = self.create_item("Put item", item.key, item.value)
         self.store[item.key] = item.value
         return item
 
-    def update_item(self, item: Item):
+    def update_item(self, item: Item) -> Item:
         if item.key not in self.store:
             return None
         item = self.create_item("Update item", item.key, item.value)
         self.store[item.key] = item.value
         return item
 
-    def delete_item(self, key: int):
+    def delete_item(self, key: int) -> Item:
         if key not in self.store:
             return None
         item = self.create_item("Delete item", key, self.store[key])
