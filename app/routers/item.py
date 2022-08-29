@@ -21,21 +21,16 @@ async def get_all_items():
     return ItemService().get_all_items()
 
 
-@router.post("/", response_model=ServiceResult)
+@router.post("/")
 async def put_item(item: Item):
-    return ItemService().put_item(item)
+    return ItemService().set_item(item)
 
 
-@router.put("/", response_model=ServiceResult)
-async def update_item(item: Item):
-    return ItemService().update_item(item)
-
-
-@router.delete("/{key}", response_model=ServiceResult)
+@router.delete("/{key}")
 async def delete_item(key: int):
     return ItemService().delete_item(key)
 
 
-@router.delete("/", response_model=ServiceResult)
+@router.delete("/")
 async def delete_all_items():
     return ItemService().delete_all_items()

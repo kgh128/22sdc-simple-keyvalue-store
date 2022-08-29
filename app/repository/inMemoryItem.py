@@ -7,42 +7,27 @@ class ItemCRUD:
     store: dict[int, str] = {}
 
     def get_item(self, key: int) -> Item:
-        if key not in self.store:
-            test = FileCRUD().get_item(key)
-            item = create_item(key, test[key])
-            return item
-        item = create_item(key, self.store[key])
-        return item
+        if key in self.store:
+            return create_item(key, self.store[key])
+        else:
+            return FileCRUD().get_item(f'{key}.json')
 
+    # noinspection PyMethodMayBeStatic
     def get_all_items(self) -> list[Item]:
-        items: list[Item] = []
-        for key in list(self.store.keys()):
-            items.append(create_item(key, self.store[key]))
-        return items
+        return FileCRUD().get_all_items()
 
-    def put_item(self, item: Item) -> Item:
-        if item.key in self.store:
-            return None
+    def set_item(self, item: Item):
         self.store[item.key] = item.value
-        FileCRUD().put_item(item)
-        return item
+        FileCRUD().set_item(item)
 
-    def update_item(self, item: Item) -> Item:
-        if item.key not in self.store:
-            return None
-        self.store[item.key] = item.value
-        FileCRUD().put_item(item)
-        return item
+    def delete_item(self, key: int) -> bool:
+        if key in self.store:
+            del self.store[key]
+            return True
+        else:
+            return FileCRUD().delete_item(f'{key}.json')
 
-    def delete_item(self, key: int) -> Item:
-        if key not in self.store:
-            return None
-        item = create_item(key, self.store[key])
-        del self.store[key]
-        return item
-
-    def delete_all_items(self) -> list[Item]:
-        items = self.get_all_items()
+    def delete_all_items(self):
         for key in list(self.store.keys()):
             del self.store[key]
-        return items
+        FileCRUD().delete_all_items()
