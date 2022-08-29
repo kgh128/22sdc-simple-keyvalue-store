@@ -1,11 +1,9 @@
 from fastapi import HTTPException
 
 from app.schemas.item import Item
-from app.schemas.serviceResult import ServiceResult
+from app.schemas.serviceResult import ServiceResult, create_service_result
 
 from app.repository.inMemoryItem import ItemCRUD
-
-from app.services.serviceResult import create_service_result
 
 
 class ItemService:
