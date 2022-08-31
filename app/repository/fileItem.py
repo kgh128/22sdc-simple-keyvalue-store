@@ -7,9 +7,9 @@ from app.utils.jsonUtils import ItemToJson
 
 class FileCRUD:
     # noinspection PyMethodMayBeStatic
-    def get_item(self, file_name: str) -> Item:
+    def get_item(self, dir_name: str, file_name: str) -> Item:
         try:
-            with open(f'database/{file_name}', 'r') as file:
+            with open(f'database/{dir_name}/{file_name}', 'r') as file:
                 item = json.load(file)
                 return create_item(item["key"], item["value"])
         except FileNotFoundError:
@@ -22,14 +22,14 @@ class FileCRUD:
         return items
 
     # noinspection PyMethodMayBeStatic
-    def set_item(self, item):
-        with open(f'database/{item.key}.json', 'w') as file:
+    def set_item(self, dir_name: str, item: Item):
+        with open(f'database/{dir_name}/{item.key}.json', 'w') as file:
             json.dump(item, file, cls=ItemToJson)
 
     # noinspection PyMethodMayBeStatic
-    def delete_item(self, file_name: str) -> bool:
+    def delete_item(self, dir_name: str, file_name: str) -> bool:
         try:
-            os.remove(f'database/{file_name}')
+            os.remove(f'database/{dir_name}/{file_name}')
             return True
         except FileNotFoundError:
             return False
