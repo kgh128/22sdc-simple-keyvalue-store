@@ -13,6 +13,6 @@ def get_path(arg: int | Item) -> str:
         key = arg.key
 
     dir_index = int(hashlib.sha256(struct.pack('i', key)).hexdigest(), 16) % DB_NUM
-    path = f'database/DB{dir_index}/{key}.json'
+    path = f'DB{dir_index}/{key}.json'
 
     return path

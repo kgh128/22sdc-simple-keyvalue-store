@@ -1,6 +1,7 @@
 import json
 import os
 
+from app.repository.S3Storage import S3Storage
 from app.schemas.item import Item, create_item
 from app.utils.jsonUtils import ItemToJson
 from app.utils.fileUtils import get_path
@@ -8,7 +9,7 @@ from app.utils.fileUtils import get_path
 
 class FileCRUD:
     def get_item(self, key: int) -> Item | None:
-        file_path = get_path(key)
+        file_path = f'database/{get_path(key)}'
 
         try:
             if os.path.getsize(file_path) == 0:
@@ -20,6 +21,9 @@ class FileCRUD:
                 return create_item(item["key"], item["value"])
 
         except (OSError, ValueError):
+            if S3Storage().download_item(key):
+                item = self.get_item(key)
+                return item
             return None
 
     def get_all_items(self, keys_in_cache: list[int]) -> list[Item]:
@@ -38,19 +42,19 @@ class FileCRUD:
 
     # noinspection PyMethodMayBeStatic
     def set_item(self, item: Item) -> bool:
-        file_path = get_path(item)
+        file_path = f'database/{get_path(item.key)}'
 
         try:
             with open(file_path, 'w') as file:
                 json.dump(item, file, cls=ItemToJson)
-                return True
+            return S3Storage().upload_item(item)
 
         except (OSError, ValueError):
             return False
 
     # noinspection PyMethodMayBeStatic
     def delete_item(self, key: int) -> bool:
-        file_path = get_path(key)
+        file_path = f'database/{get_path(key)}'
 
         try:
             os.remove(file_path)
