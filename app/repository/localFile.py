@@ -58,10 +58,12 @@ class FileCRUD:
 
         try:
             os.remove(file_path)
-            return True
 
         except (OSError, ValueError):
-            return False
+            pass
+
+        finally:
+            return S3Storage().delete_item(key)
 
     # noinspection PyMethodMayBeStatic
     def delete_all_items(self) -> None:
