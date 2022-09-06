@@ -8,7 +8,6 @@ from app.config.s3Storage import s3_connection
 from app.routers import item
 
 app = FastAPI()
-s3 = s3_connection()
 
 
 @app.exception_handler(StarletteHTTPException)
