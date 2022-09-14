@@ -1,5 +1,6 @@
 import logging
 from botocore.exceptions import ClientError
+from boto3.exceptions import S3UploadFailedError
 
 from app.config.s3Storage import s3_connection
 from app.schemas.item import Item
@@ -31,7 +32,7 @@ class S3Storage:
             self.s3.upload_file(file_path, self.bucket, object_name)
             return True
 
-        except ClientError as e:
+        except (ClientError, S3UploadFailedError) as e:
             logging.error(e)
             return False
 
@@ -42,8 +43,7 @@ class S3Storage:
             response = self.s3.list_objects_v2(Bucket=self.bucket, Prefix=object_name, MaxKeys=1)
             if 'Contents' in response:
                 self.s3.delete_object(Bucket=self.bucket, Key=object_name)
-                return True
-            return False
+            return True
 
         except ClientError as e:
             logging.error(e)
