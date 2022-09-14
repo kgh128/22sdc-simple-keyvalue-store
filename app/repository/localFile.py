@@ -56,6 +56,9 @@ class FileCRUD:
             os.remove(file_path)
             return True
 
+        except FileNotFoundError:
+            return True
+
         except (OSError, ValueError):
             return False
 

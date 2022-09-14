@@ -22,12 +22,14 @@ class ItemService:
         # 존재하는 key이면 저장되어 있는 위치에서 get
         location = KEY_LIST.get_location(key)
 
+        # LRU Cache에서 get
         if location == 'cache':
             item = CACHE.get_item(key)
             if item:
                 return create_get_response("Success - Get item.", item)
             location = 'local'
 
+        # Local File에서 get
         if location == 'local':
             item = FileCRUD().get_item(key)
             if item:
@@ -35,6 +37,7 @@ class ItemService:
                 return create_get_response("Success - Get item.", item)
             location = 'S3'
 
+        # S3 Storage에서 get
         if location == 'S3':
             success_in_s3 = S3Storage().download_item(key)
             if success_in_s3:
@@ -61,11 +64,15 @@ class ItemService:
         # Local File에 set
         success_in_local = FileCRUD().set_item(item)
         if not success_in_local:
+            CACHE.delete_item(item.key)
+            KEY_LIST.delete_key(item.key)
             raise HTTPException(status_code=500, detail="데이터 저장에 실패하였습니다.")
 
         # S3 Storage에 upload
         success_in_s3 = S3Storage().upload_item(item)
         if not success_in_s3:
+            CACHE.delete_item(item.key)
+            KEY_LIST.delete_key(item.key)
             raise HTTPException(status_code=500, detail="데이터 업로드에 실패하였습니다.")
 
         # 모든 store에 set 성공한 경우
@@ -73,21 +80,30 @@ class ItemService:
 
     # noinspection PyMethodMayBeStatic
     def delete_item(self, key: int) -> ResponseDTO:
+        # key list에 존재하는 key인지 확인
+        if not KEY_LIST.is_in_key_list(key):
+            raise HTTPException(status_code=404, detail="해당 key가 존재하지 않아 value를 삭제할 수 없습니다.")
+
+        # 존재하는 key이면 모든 store에서 delete
+
         # LRU Cache에서 delete
         CACHE.delete_item(key)
 
         # Local File에서 delete
         success_in_local = FileCRUD().delete_item(key)
+        if not success_in_local:
+            KEY_LIST.set_key(key, 'local')
+            raise HTTPException(status_code=500, detail="데이터 삭제에 실패하였습니다.")
 
         # S3 Storage에서 delete
         success_in_s3 = S3Storage().delete_item(key)
+        if not success_in_s3:
+            KEY_LIST.set_key(key, 'S3')
+            raise HTTPException(status_code=500, detail="데이터 삭제에 실패하였습니다.")
 
-        # 어느 store에서든 key가 존재하여 delete가 성공한 경우
-        if success_in_local or success_in_s3:
-            return create_response("Success - Delete item.")
-
-        # 모든 store에 key가 존재하지 않아 delete를 실패한 경우
-        raise HTTPException(status_code=404, detail="해당 key가 존재하지 않아 value를 삭제할 수 없습니다.")
+        # 모든 store에서 delete가 성공한 경우
+        KEY_LIST.delete_key(key)
+        return create_response("Success - Delete item.")
 
     # noinspection PyMethodMayBeStatic
     def delete_all_items(self) -> ResponseDTO:

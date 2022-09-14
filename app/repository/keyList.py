@@ -27,9 +27,12 @@ class KeyList:
 
     def set_key(self, key: int, location: str) -> None:
         self.key_list[key] = location
+        return None
 
     def delete_key(self, key: int) -> None:
-        del self.key_list[key]
+        if key in self.key_list:
+            del self.key_list[key]
+        return None
 
     def get_location(self, key: int) -> str:
         return self.key_list[key]
