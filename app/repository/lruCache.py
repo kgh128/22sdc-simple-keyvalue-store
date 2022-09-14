@@ -1,16 +1,15 @@
 from collections import OrderedDict
 
 from app.schemas.item import Item, create_item
+from app.repository.keyList import KeyList
 from app.repository.localFile import FileCRUD
 
+KEY_LIST = KeyList()
 MAX_SIZE = 10000
 
 
 class LruCache:
-    cache: OrderedDict[int, str]
-
-    def __init__(self):
-        self.cache = OrderedDict()
+    cache: OrderedDict[int, str] = OrderedDict()
 
     def get_item(self, key: int) -> Item | None:
         if key in self.cache:
@@ -35,9 +34,11 @@ class LruCache:
             self.cache.move_to_end(item.key)
 
         if len(self.cache) == MAX_SIZE:
-            self.cache.popitem(last=False)
+            pop_item = self.cache.popitem(last=False)
+            KEY_LIST.set_key(pop_item[0], 'local')
 
         self.cache[item.key] = item.value
+        KEY_LIST.set_key(item.key, 'cache')
         return None
 
     def delete_item(self, key: int) -> None:

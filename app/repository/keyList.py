@@ -4,11 +4,9 @@ from app.config.s3Storage import s3_connection
 
 
 class KeyList:
-    key_list: dict[int, str]
+    key_list: dict[int, str] = dict()
 
     def __init__(self):
-        self.key_list = dict()
-
         s3 = s3_connection()
         paginator = s3.get_paginator('list_objects_v2')
 
@@ -35,3 +33,7 @@ class KeyList:
 
     def get_location(self, key: int) -> str:
         return self.key_list[key]
+
+    # 디버깅 용도 - 구현 완료 후 삭제
+    def print_key_list(self):
+        print(self.key_list)
