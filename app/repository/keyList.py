@@ -22,8 +22,16 @@ class KeyList:
                     key = int(os.path.splitext(file_name)[0])
                     self.key_list[key] = 'S3'
 
+    def is_in_key_list(self, key: int) -> bool:
+        if key in self.key_list:
+            return True
+        return False
+
+    def set_key(self, key: int, location: str) -> None:
+        self.key_list[key] = location
+
+    def delete_key(self, key: int) -> None:
+        del self.key_list[key]
+
     def get_location(self, key: int) -> str:
         return self.key_list[key]
-
-    def set_location(self, key: int, location: str) -> None:
-        self.key_list[key] = location
