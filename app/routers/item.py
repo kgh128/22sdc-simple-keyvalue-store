@@ -25,7 +25,9 @@ async def get_item(key: int):
 
 @router.get("/", response_model=GetResponseDTO)
 async def get_all_items():
-    return ItemService().get_all_items()
+    service_result = ItemService().get_all_items()
+
+    return create_get_response("Success - Get all items.", service_result.items)
 
 
 @router.post("/", response_model=ResponseDTO)
@@ -54,4 +56,9 @@ async def delete_item(key: int):
 
 @router.delete("/", response_model=ResponseDTO)
 async def delete_all_items():
-    return ItemService().delete_all_items()
+    service_result = ItemService().delete_all_items()
+
+    if service_result.code == FailCode.DELETE_ALL_FAIL:
+        raise HTTPException(status_code=500, detail="데이터 전체 삭제에 실패하였습니다.")
+    if service_result.code == SuccessCode.DELETE_ALL_SUCCESS:
+        return create_response("Success - Delete all items.")

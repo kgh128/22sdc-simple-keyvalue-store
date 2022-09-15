@@ -1,12 +1,8 @@
-from fastapi import HTTPException
-
 from app.repository.keyList import KeyList
 from app.repository.lruCache import LruCache
 from app.repository.localFile import FileCRUD
 from app.repository.S3Storage import S3Storage
 from app.schemas.item import Item
-from app.schemas.responseDTO import ResponseDTO, create_response
-from app.schemas.responseDTO import GetResponseDTO, create_get_response
 from app.utils.resultCode import SuccessCode, FailCode
 from app.utils.serviceResult import ServiceResult
 
@@ -51,12 +47,17 @@ class ItemService:
         KEY_LIST.delete_key(key)
         return ServiceResult(FailCode.KEY_NOT_FOUND)
 
-    # noinspection PyMethodMayBeStatic
-    def get_all_items(self) -> GetResponseDTO:
-        items = CACHE.get_all_items()
-        if not items:
-            raise HTTPException(status_code=404, detail="데이터베이스가 비어있습니다.")
-        return create_get_response("Success - Get all items.", items)
+    def get_all_items(self) -> ServiceResult:
+        items: list[Item] = list()
+        keys = KEY_LIST.get_all_keys()
+
+        # key list에 있는 key를 하나씩 돌면서 get
+        for key in keys:
+            service_result = self.get_item(key)
+            if service_result.success:
+                items.append(service_result.items)
+
+        return ServiceResult(SuccessCode.GET_ALL_SUCCESS, items)
 
     # noinspection PyMethodMayBeStatic
     def set_item(self, item: Item) -> ServiceResult:
@@ -108,6 +109,14 @@ class ItemService:
         return ServiceResult(SuccessCode.DELETE_SUCCESS)
 
     # noinspection PyMethodMayBeStatic
-    def delete_all_items(self) -> ResponseDTO:
-        CACHE.delete_all_items()
-        return create_response("Success - Delete all items.")
+    def delete_all_items(self) -> ServiceResult:
+        keys = KEY_LIST.get_all_keys()
+
+        # key list에 있는 key를 하나씩 돌면서 delete
+        for key in keys:
+            service_result = self.delete_item(key)
+            if service_result == FailCode.DELETE_FAIL:
+                return ServiceResult(FailCode.DELETE_ALL_FAIL)
+
+        # 모든 store의 모든 데이터에 대해 delete가 성공한 경우
+        return ServiceResult(SuccessCode.DELETE_ALL_SUCCESS)
