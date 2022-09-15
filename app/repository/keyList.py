@@ -25,6 +25,9 @@ class KeyList:
             return True
         return False
 
+    def get_all_keys(self) -> list[int]:
+        return list(self.key_list.keys())
+
     def set_key(self, key: int, location: str) -> None:
         self.key_list[key] = location
         return None
@@ -36,7 +39,3 @@ class KeyList:
 
     def get_location(self, key: int) -> str:
         return self.key_list[key]
-
-    # 디버깅 용도 - 구현 완료 후 삭제
-    def print_key_list(self):
-        print(self.key_list)
